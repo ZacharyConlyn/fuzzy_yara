@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from binaryninja import show_message_box
 from binaryninjaui import SidebarWidget, SidebarWidgetType, Sidebar, UIActionHandler, SidebarWidgetLocation, \
     SidebarContextSensitivity, UIContext, UIAction, Menu
 from binaryninja.plugin import PluginCommand
@@ -148,7 +149,20 @@ def initialize_capstone():
     md.detail = True
     return md
 
+def get_widget():
+    my_widget_list = [widget for widget in UIContext.activeContext().mainWindow().findChildren(FuzzyYaraSidebarWidget)]
+    if not my_widget_list:
+        show_message_box("Uh oh", "Open the widget because I'm a bad programmer")
+    elif len(my_widget_list) > 1:
+        show_message_box("Uh oh", "Found more than one widget i'm FREAKING OUT")
+    else:
+        return my_widget_list[0]
+    
+
 def run_yara_plugin_function(bv, func):
+    widget = get_widget()
+    if not widget:
+        return
     md = initialize_capstone()
 
     # analyze the function under the cursor
@@ -161,11 +175,13 @@ def run_yara_plugin_function(bv, func):
         for byte_pattern in analyze_block(bv, block, md):
             yara_rule.push_bytes(byte_pattern)
         f.add_yara_rule(yara_rule)
-    return f.get_result()
+    widget.update_rules(f.get_result())
 
 
 def run_yara_plugin_range(bv, start, size):
-    print(f"run_yara_plugin_range called with start: {start}, sie:{size}")
+    widget = get_widget()
+    if not widget:
+        return
     md = initialize_capstone()
     end = start + size
     curr_addr = start
@@ -204,8 +220,7 @@ def run_yara_plugin_range(bv, start, size):
         for byte_pattern in analyze_block(bv, block, md):
             yara_rule.push_bytes(byte_pattern)
         f.add_yara_rule(yara_rule)
-    print(f.get_result())
-    #return f.get_result()
+    widget.update_rules(f.get_result())
 
 
     
@@ -219,9 +234,9 @@ class FuzzyYaraSidebarWidget(SidebarWidget):
         self.data = data
         self.actionHandler = UIActionHandler()
         self.actionHandler.setupActionHandler(self)
-        UIAction.registerAction(f"FuzzyYara\\Generate Signature On Function")
-        self.actionHandler.globalActions().bindAction("FuzzyYara\\Generate Signature On Function", UIAction(self.gen_sig_on_func))
-        Menu.mainMenu("Plugins").addAction(f"FuzzyYara\\Generate Signature On Function", "FuzzyYara", 0)
+        #UIAction.registerAction(f"FuzzyYara\\Generate Signature On Function")
+        #self.actionHandler.globalActions().bindAction("FuzzyYara\\Generate Signature On Function", UIAction(self.gen_sig_on_func))
+        #Menu.mainMenu("Plugins").addAction(f"FuzzyYara\\Generate Signature On Function", "FuzzyYara", 0)
         self.layout = QVBoxLayout()
         self.text_box = QTextEdit(self)
         self.layout.addWidget(self.text_box)
@@ -240,33 +255,11 @@ class FuzzyYaraSidebarWidget(SidebarWidget):
                 print(f"Writing this: {self.text_box.toPlainText()}")
                 outfile.write(self.text_box.toPlainText().encode("utf-8"))
 
-    
-    def gen_sig_on_func(self, view):
-        if not view:
-            print("NO VIEW")
-            return
-        function = view.function
-        
-        output = run_yara_plugin_function(view.binaryView, function)
-        self.text_box.setText(output)
-        #self.activateWindow()
-        #self.focusWidget()
-        self.setVisible(True)
-        self.setHidden(False)
-        #print(dir(self))
-    
-
     def notifyOffsetChanged(self, offset):
         pass
 
     def notifyViewChanged(self, view_frame):
         pass
-        if view_frame is None:
-            self.data = None
-        else:
-            #self.datatype.setText(view_frame.getCurrentView())
-            view = view_frame.getCurrentViewInterface()
-            #self.text_box.setText("Cool :)")
 
     def contextMenuEvent(self, event):
         self.m_contextMenuManager.show(self.m_menu, self.actionHandler)
@@ -343,5 +336,5 @@ Settings().register_setting(
     }"""
 )
 
-#PluginCommand.register_for_function("Write Yara rule (function)", "Write a Yara rule matching this function's basic blocks", self.my_custom_action)
+PluginCommand.register_for_function("Write Yara rule (function)", "Write a Yara rule matching this function's basic blocks", run_yara_plugin_function)
 PluginCommand.register_for_range("Write Yara rule (range)", "Write Yara rule matching the basic blocks in this range", run_yara_plugin_range)
