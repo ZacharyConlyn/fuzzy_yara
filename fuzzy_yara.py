@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
 from binaryninja import show_message_box
 from binaryninjaui import SidebarWidget, SidebarWidgetType, Sidebar, UIActionHandler, SidebarWidgetLocation, \
     SidebarContextSensitivity, UIContext, UIAction, Menu
@@ -260,26 +261,8 @@ class FuzzyYaraSidebarWidget(SidebarWidget):
 
 class FuzzyYaraSidebarWidgetType(SidebarWidgetType):
     def __init__(self):
-        # icon = QImage(56, 56, QImage.Format_RGB32)
-        # icon.fill(0)
-
-        # p = QPainter()
-        # p.begin(icon)
-        # p.setFont(QFont("Open Sans", 56))
-        # p.setPen(QColor(255, 255, 255, 255))
-        # p.drawText(QRectF(0, 0, 56, 56), Qt.AlignCenter, "YY")
-        # p.end()
-        from pathlib import Path
         home_dir = Path.home()
-        try:
-            x = open(f"{home_dir}/.binaryninja/plugins/fy_icon.png", "r")
-            x.close()
-        except Exception:
-            import os
-            print("OH NO COULD NOT OPEN PNG")
-            print(f"Current directory: {os.getcwd()}")
         icon = QImage(f"{home_dir}/.binaryninja/plugins/fy_icon.png")
-        #icon.convertToFormat(QImage.Format_Grayscale8)
         if icon.size() != QSize(56, 56):
             icon = icon.scaled(56, 56, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
