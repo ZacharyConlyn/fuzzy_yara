@@ -6,7 +6,7 @@ from binaryninjaui import SidebarWidget, SidebarWidgetType, Sidebar, UIActionHan
 from binaryninja.plugin import PluginCommand
 from binaryninja.settings import Settings
 from PySide6 import QtCore
-from PySide6.QtCore import Qt, QRectF
+from PySide6.QtCore import Qt, QRectF, QSize
 from PySide6.QtWidgets import QApplication, QFileDialog, QGridLayout, QHBoxLayout, QLineEdit, QPushButton, QTextEdit, QVBoxLayout, QLabel, QWidget
 from PySide6.QtGui import QImage, QPixmap, QPainter, QFont, QColor
 
@@ -16,6 +16,7 @@ from capstone import *
 def create_valid_yara_name(some_string):
     some_string = "test"
     some_string.replace
+
 def handle_inst(cap_inst):
     if cap_inst.op_count(CS_OP_MEM) == 1:
         return handle_mem_inst(cap_inst)
@@ -92,9 +93,6 @@ class Function():
 
 
 def get_instructions_as_blocks(func):
-    # read all the instructions in the function
-    # and record their address and size
-    # we use blocks here instead of directly because blocks gives us the size of the instruction
     blocks = []
     for block in func:
         block_instructions = []
@@ -159,14 +157,11 @@ def get_widget():
         return my_widget_list[0]
     
 
-def run_yara_plugin_function(bv, func):
+def run_fuzzy_yara_plugin_function(bv, func):
     widget = get_widget()
     if not widget:
         return
     md = initialize_capstone()
-
-    # analyze the function under the cursor
-
     sorted_instructions = get_instructions_as_blocks(func)
     f = Function(func.name, func.start)
     for block in sorted_instructions:
@@ -178,7 +173,7 @@ def run_yara_plugin_function(bv, func):
     widget.update_rules(f.get_result())
 
 
-def run_yara_plugin_range(bv, start, size):
+def run_fuzzy_yara_plugin_range(bv, start, size):
     widget = get_widget()
     if not widget:
         return
@@ -224,8 +219,6 @@ def run_yara_plugin_range(bv, start, size):
 
 
     
-# Sidebar widgets must derive from SidebarWidget, not QWidget. SidebarWidget is a QWidget but
-# provides callbacks for sidebar events, and must be created with a title.
 class FuzzyYaraSidebarWidget(SidebarWidget):
     def __init__(self, name, frame, data):
         global instance_id
@@ -234,9 +227,6 @@ class FuzzyYaraSidebarWidget(SidebarWidget):
         self.data = data
         self.actionHandler = UIActionHandler()
         self.actionHandler.setupActionHandler(self)
-        #UIAction.registerAction(f"FuzzyYara\\Generate Signature On Function")
-        #self.actionHandler.globalActions().bindAction("FuzzyYara\\Generate Signature On Function", UIAction(self.gen_sig_on_func))
-        #Menu.mainMenu("Plugins").addAction(f"FuzzyYara\\Generate Signature On Function", "FuzzyYara", 0)
         self.layout = QVBoxLayout()
         self.text_box = QTextEdit(self)
         self.layout.addWidget(self.text_box)
@@ -270,44 +260,41 @@ class FuzzyYaraSidebarWidget(SidebarWidget):
 
 class FuzzyYaraSidebarWidgetType(SidebarWidgetType):
     def __init__(self):
-        # Sidebar icons are 28x28 points. Should be at least 56x56 pixels for
-        # HiDPI display compatibility. They will be automatically made theme
-        # aware, so you need only provide a grayscale image, where white is
-        # the color of the shape.
-        icon = QImage(56, 56, QImage.Format_RGB32)
-        icon.fill(0)
+        # icon = QImage(56, 56, QImage.Format_RGB32)
+        # icon.fill(0)
 
-        # Render an "H" as the example icon
-        p = QPainter()
-        p.begin(icon)
-        p.setFont(QFont("Open Sans", 56))
-        p.setPen(QColor(255, 255, 255, 255))
-        p.drawText(QRectF(0, 0, 56, 56), Qt.AlignCenter, "Y")
-        p.end()
+        # p = QPainter()
+        # p.begin(icon)
+        # p.setFont(QFont("Open Sans", 56))
+        # p.setPen(QColor(255, 255, 255, 255))
+        # p.drawText(QRectF(0, 0, 56, 56), Qt.AlignCenter, "YY")
+        # p.end()
+        from pathlib import Path
+        home_dir = Path.home()
+        try:
+            x = open(f"{home_dir}/.binaryninja/plugins/fy_icon.png", "r")
+            x.close()
+        except Exception:
+            import os
+            print("OH NO COULD NOT OPEN PNG")
+            print(f"Current directory: {os.getcwd()}")
+        icon = QImage(f"{home_dir}/.binaryninja/plugins/fy_icon.png")
+        #icon.convertToFormat(QImage.Format_Grayscale8)
+        if icon.size() != QSize(56, 56):
+            icon = icon.scaled(56, 56, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
         SidebarWidgetType.__init__(self, icon, "Fuzzy Yara Rule Editor")
 
     def createWidget(self, frame, data):
-        # This callback is called when a widget needs to be created for a given context. Different
-        # widgets are created for each unique BinaryView. They are created on demand when the sidebar
-        # widget is visible and the BinaryView becomes active.
         return FuzzyYaraSidebarWidget("Fuzzy Yara Rule Editor", frame, data)
 
     def defaultLocation(self):
-        # Default location in the sidebar where this widget will appear
         return SidebarWidgetLocation.RightContent
 
     def contextSensitivity(self):
-        # Context sensitivity controls which contexts have separate instances of the sidebar widget.
-        # Using `contextSensitivity` instead of the deprecated `viewSensitive` callback allows sidebar
-        # widget implementations to reduce resource usage.
-
-        # This example widget uses a single instance and detects view changes.
         return SidebarContextSensitivity.SelfManagedSidebarContext
 
 
-# Register the sidebar widget type with Binary Ninja. This will make it appear as an icon in the
-# sidebar and the `createWidget` method will be called when a widget is required.
 Sidebar.addSidebarWidgetType(FuzzyYaraSidebarWidgetType())
 
 
@@ -336,5 +323,5 @@ Settings().register_setting(
     }"""
 )
 
-PluginCommand.register_for_function("Write Yara rule (function)", "Write a Yara rule matching this function's basic blocks", run_yara_plugin_function)
-PluginCommand.register_for_range("Write Yara rule (range)", "Write Yara rule matching the basic blocks in this range", run_yara_plugin_range)
+PluginCommand.register_for_function("Generate Fuzzy Yara rule (function)", "Generate a fuzzy Yara rule matching this function's basic blocks", run_fuzzy_yara_plugin_function)
+PluginCommand.register_for_range("Generate Fuzzy Yara rule (range)", "Generate a fuzzy Yara rule matching the basic blocks in this range", run_fuzzy_yara_plugin_range)
