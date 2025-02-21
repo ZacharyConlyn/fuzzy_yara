@@ -32,7 +32,7 @@ def handle_mem_inst(cap_inst):
     return create_byte_mask(cap_inst.bytes, cap_inst.encoding.disp_offset, cap_inst.encoding.disp_size)
 
 def create_byte_mask(inst_bytes, index, mem_size):
-    if mem_size == 0:
+    if mem_size <= 0:
         raise ValueError("mem size cannot be zero")
     ret_list = [f"{b:02X}" if (i < index) or (i >= index + mem_size) else "??" for i, b in enumerate(inst_bytes)]
 
@@ -42,8 +42,9 @@ def create_byte_mask(inst_bytes, index, mem_size):
     return ret_list
 
 class YaraRule():
-    def __init__(self, name):
+    def __init__(self, name, base_addr):
         self.name = name
+        self.base_addr = base_addr
         self.bytes_to_print = []
     
     def push_bytes(self, bytes_to_print):
@@ -103,6 +104,8 @@ class Function():
         return self.hash
 
     def get_result(self):
+        if self.yara_rules:
+            self.yara_rules.sort(key=lambda x: x.base_addr)
         valid_rules = [rule.get_rule() for rule in self.yara_rules if rule.get_rule()]
         if not valid_rules:
             log_warn("No valid rules generated! Try changing the settings to allow for shorter rules or more wildcards", "FuzzyYara")
@@ -185,8 +188,13 @@ def analyze_block(bv, instructions, md):
 def get_block_base_addr(block):
     return block[0][2]
 
-def initialize_capstone():
-    md = Cs(CS_ARCH_X86, CS_MODE_64)
+def initialize_capstone(bv):
+    if 'x86_64' == bv.arch.name:
+        md = Cs(CS_ARCH_X86, CS_MODE_64)
+    elif 'x86' == bv.arch.name:
+            md = Cs(CS_ARCH_X86, CS_MODE_32)
+    else:
+        raise NotImplementedError("Cannot handle the binary's architecture!")
     md.detail = True
     return md
 
@@ -204,12 +212,12 @@ def run_fuzzy_yara_plugin_function(bv, func):
     widget = get_widget()
     if not widget:
         return
-    md = initialize_capstone()
+    md = initialize_capstone(bv)
     sorted_instructions = get_instructions_as_blocks(func)
     f = Function(func.name, bv)
     for block in sorted_instructions:
         block_name = "block_" + hex(get_block_base_addr(block))
-        yara_rule = YaraRule(block_name)
+        yara_rule = YaraRule(block_name, get_block_base_addr(block))
         for byte_pattern in analyze_block(bv, block, md):
             yara_rule.push_bytes(byte_pattern)
         f.add_yara_rule(yara_rule)
@@ -253,7 +261,7 @@ def run_fuzzy_yara_plugin_range(bv, start, size):
         if block_instructions:
             block_list.append(sorted(block_instructions, key=lambda x: x[2]))
     for block in block_list:
-        yara_rule = YaraRule(str(hex(get_block_base_addr(block))))
+        yara_rule = YaraRule(str(hex(get_block_base_addr(block))), get_block_base_addr(block))
         for byte_pattern in analyze_block(bv, block, md):
             yara_rule.push_bytes(byte_pattern)
         f.add_yara_rule(yara_rule)
@@ -320,7 +328,6 @@ class FuzzyYaraSidebarWidgetType(SidebarWidgetType):
 
 
 Sidebar.addSidebarWidgetType(FuzzyYaraSidebarWidgetType())
-
 
 Settings().register_group("fuzzyyara", "Fuzzy Yara Rule Generator")
 Settings().register_setting(
