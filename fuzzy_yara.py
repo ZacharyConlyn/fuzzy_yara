@@ -228,7 +228,7 @@ def run_fuzzy_yara_plugin_range(bv, start, size):
     widget = get_widget()
     if not widget:
         return
-    md = initialize_capstone()
+    md = initialize_capstone(bv)
     end = start + size
     curr_addr = start
     block_list = []
