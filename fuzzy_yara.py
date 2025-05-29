@@ -14,9 +14,63 @@ from PySide6.QtCore import Qt, QRectF, QSize
 from PySide6.QtWidgets import QApplication, QFileDialog, QGridLayout, QHBoxLayout, QLineEdit, QPushButton, QTextEdit, QVBoxLayout, QLabel, QWidget
 from PySide6.QtGui import QImage, QPixmap, QPainter, QFont, QColor
 
+icon_as_b64 = """iVBORw0KGgoAAAANSUhEUgAAAHEAAABgCAYAAAAq9J3uAAAAAXNSR0IArs4c6QAAAARnQU1BAACx
+jwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAGHaVRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8
+P3hwYWNrZXQgYmVnaW49J++7vycgaWQ9J1c1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCc/Pg0KPHg6
+eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyI+PHJkZjpSREYgeG1sbnM6cmRmPSJodHRw
+Oi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj48cmRmOkRlc2NyaXB0aW9u
+IHJkZjphYm91dD0idXVpZDpmYWY1YmRkNS1iYTNkLTExZGEtYWQzMS1kMzNkNzUxODJmMWIiIHht
+bG5zOnRpZmY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvIj48dGlmZjpPcmllbnRhdGlv
+bj4xPC90aWZmOk9yaWVudGF0aW9uPjwvcmRmOkRlc2NyaXB0aW9uPjwvcmRmOlJERj48L3g6eG1w
+bWV0YT4NCjw/eHBhY2tldCBlbmQ9J3cnPz4slJgLAAAKNklEQVR4Xu3df0wUZx4G8GeXxUXXCrJl
+EQqHi+uPo54ogl6p9iShEWobsCY0xoQCqU0bz2jTRHsQPaWxCaamXGhTY5vC2XiJSdPQxgYbm8Bp
+AkGUgkpLZWBBRvT2LLLIipiBvT8ED7+y7My8s7Cw7ycxmufdEJLHeXfmnV8Ax3HTT3c+IiJDp9P9
+gQ74QnB4ePDSsrLNYZs2ZegNhmA6Lsd9QWhqfPHFz0k8sNHh+BfJAobugsVyRqfTbaEDWjLGxiKq
+oACWnBwEm810WJH++npczcp6MnS7b2xwOOKeDAOHngZaCgoNRfxHH2FtXR2ee/dd5gIBwD08TKOA
+57MSw9LSsKa6GlEFBdAZDHRYtWGXi0YBzyclRu3ciYSvv4YxOpoOMXt46xaNAp7mJcbs3Yv4Dz/U
+dOsb76HDQaOAp2mJz2ZnI+6DD2jM+ZhmJRpjY2E7dozGmpsTFUWjgKdZiXFFRQgymWisOV9N0zOZ
+JiXOtdkQkZ1NY58w8i3xKZqUGLljB418Rurvp1HA02TFJqmuDnOtVhorNuxywVlbi0FBgOR0YmRo
+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"""
 
 from capstone import *
-
 
 def handle_inst(cap_inst):
     if cap_inst.op_count(CS_OP_MEM) == 1:
@@ -171,7 +225,7 @@ def analyze_block(bv, instructions, md):
                 byte_pattern = handle_inst(cap_inst)
             else:
                 if "address" in [i.type.name.lower() for i in inst]:
-                    log_warn(f"Found possible missed instruction: {"".join(str(i) for i in inst)}", "FuzzyYara")
+                    log_warn(f"Found possible missed instruction: {''.join(str(i) for i in inst)}", "FuzzyYara")
                 byte_pattern = [f"{i:02X}" for i in inst_bytes]
             if len(byte_pattern) != len(inst_bytes):
                 raise ValueError("The byte pattern length should match the instruction length")
@@ -251,7 +305,7 @@ def run_fuzzy_yara_plugin_range(bv, start, size):
             if curr_addr < start:
                 if (curr_addr + inst_size) > start:
                     raise NotImplementedError("TODO: handle partial instructions")
-                log_debug(f"skipping instruction '{"".join(i.text for i in instruction[0])}' at address {hex(curr_addr)}", "FuzzyYara")
+                log_debug(f"skipping instruction {''.join(i.text for i in instruction[0])} at address {hex(curr_addr)}", "FuzzyYara")
                 curr_addr += inst_size
                 continue
             if (curr_addr + inst_size) > end:
@@ -310,8 +364,14 @@ class FuzzyYaraSidebarWidget(SidebarWidget):
 
 class FuzzyYaraSidebarWidgetType(SidebarWidgetType):
     def __init__(self):
-        home_dir = Path.home()
-        icon = QImage(f"{home_dir}/.binaryninja/plugins/fy_icon.png")
+        import os
+        current_dir = os.getcwd()
+        print("Current working directory:", current_dir)
+        log_info(f"Current working directory: {current_dir}", "FuzzyYara")
+        import base64
+        image_data = base64.b64decode(icon_as_b64)
+        icon = QImage()
+        icon.loadFromData(image_data)
         if icon.size() != QSize(56, 56):
             icon = icon.scaled(56, 56, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
@@ -353,6 +413,7 @@ Settings().register_setting(
         "ignore" : ["SettingsProjectScope", "SettingsResourceScope"]
     }"""
 )
+
 
 PluginCommand.register_for_function("Generate Fuzzy Yara rule (function)", "Generate a fuzzy Yara rule matching this function's basic blocks", run_fuzzy_yara_plugin_function)
 PluginCommand.register_for_range("Generate Fuzzy Yara rule (range)", "Generate a fuzzy Yara rule matching the basic blocks in this range", run_fuzzy_yara_plugin_range)
