@@ -19,15 +19,6 @@ Certainly! Here’s a README.md draft for your **fuzzy_yara** Binary Ninja plugi
 
 ## Installation
 
-### Requirements
-
-- [Binary Ninja](https://binary.ninja/)
-- Python 3
-- [capstone](https://www.capstone-engine.org/) (Python bindings)
-- [PySide6](https://pypi.org/project/PySide6/)
-
-### Steps
-
 1. **Clone the repository:**
 
    ```shell
