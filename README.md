@@ -36,7 +36,7 @@ Certainly! Here’s a README.md draft for your **fuzzy_yara** Binary Ninja plugi
 
 2. **Install dependencies:**
 
-   You may need to install Capstone and PySide6 if you haven't already. Binja gives you an easy way to do that: `View -> Command Palette -> Install Python3 Module` and enter `capstone` 
+   You may need to install Capstone if you haven't already. Binja gives you an easy way to do that: `View -> Command Palette -> Install Python3 Module` and enter `capstone` 
 
 
 4. **Copy `fuzzy_yara.py` to your Binary Ninja plugins folder:**
