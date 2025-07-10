@@ -50,9 +50,9 @@ Certainly! Here’s a README.md draft for your **fuzzy_yara** Binary Ninja plugi
       - `Generate Fuzzy Yara rule (range)` – for a selected address range
 
 4. **View and Save Rules:**
-    - Generated rules appear in the sidebar widget.
+    - Generated rules appear in the sidebar widget
     - You can modify them to your heart's content
-    - Click **Save** to export the rules to a file.
+    - Click **Save** to export the rules to a file
 
 5. **Configuration:**
     - Go to Binary Ninja’s Settings and search for “Fuzzy Yara Rule Generator”.
