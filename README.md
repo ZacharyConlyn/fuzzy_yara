@@ -1,5 +1,3 @@
-Certainly! Here’s a README.md draft for your **fuzzy_yara** Binary Ninja plugin:
-
 ---
 
 # fuzzy_yara
@@ -60,3 +58,5 @@ Certainly! Here’s a README.md draft for your **fuzzy_yara** Binary Ninja plugi
       - Minimum rule bytes (`fuzzyyara.min_rule_bytes`)
       - Minimum non-wildcard bytes (`fuzzyyara.min_non_wildcard_bytes`)
 
+## Shoutouts
+The original idea for this plugin came from CMU-SEI's Pharos, specifically the `fn2yara` analysis: https://github.com/cmu-sei/pharos/tree/master/tools/fn2yara . CMU-SEI also gave me the time and office space to work on this, and some guidance along the way. Finally they taught me the true power of friendship and to always believe in myself.
