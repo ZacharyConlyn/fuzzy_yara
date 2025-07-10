@@ -42,7 +42,6 @@ Certainly! Here’s a README.md draft for your **fuzzy_yara** Binary Ninja plugi
 4. **Copy `fuzzy_yara.py` to your Binary Ninja plugins folder:**
 
    - On most systems, this is `~/.binaryninja/plugins/`
-   - Alternatively, use Binary Ninja's plugin manager.
 
 5. **Restart Binary Ninja.**
 
