@@ -6,7 +6,7 @@
 
 ## Overview
 
-`fuzzy_yara` is a Binary Ninja plugin that automatically generates flexible Yara rules from functions or ranges in your binary analysis. It analyzes instructions, intelligently masks bytes (wildcards), and produces Yara rules that are robust to small changes, helping you detect malware or similar binaries even if they have minor modifications.
+`fuzzy_yara` is a Binary Ninja plugin that automatically generates flexible Yara rules from functions or ranges in your x86 or AMD64 binary analysis. It analyzes instructions, intelligently masks offsets and addresses with wildcards, and produces Yara rules that are robust to recompilation--even across operating systems--helping you detect malware or similar binaries even if they have minor modifications.
 
 ## Features
 
