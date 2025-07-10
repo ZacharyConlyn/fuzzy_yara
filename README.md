@@ -41,7 +41,7 @@ Certainly! Here’s a README.md draft for your **fuzzy_yara** Binary Ninja plugi
 1. **Open a binary in Binary Ninja.**
 
 2. **Sidebar Widget:**
-    - Open the "Fuzzy Yara Rule Editor" from the sidebar to view generated rules. Actually I didn't/don't know how to properly use the Binja API so you HAVE to open this panel at least once (you can close again) before using the analysis functions.
+    - Open the "Fuzzy Yara Rule Editor" from the sidebar to view generated rules. Actually I didn't/don't know how to properly use the Binja API, so you HAVE to open this panel at least once before using the analysis functions. Once you open it once, you can close it freely and it should still work.
 
 3. **Generate Yara rules:**
     - **Right-click** on a function or select a range in Binary Ninja.
